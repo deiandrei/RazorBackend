@@ -73,7 +73,6 @@ namespace Backend {
 
 	void RenderBuffer::CopyLegacy(GLuint destination, int w, int h, AttachmentType copyType) {
 		this->Bind(BindingType::RENDERBUFFER_READ, true);
-		//destination->Bind(BindingType::RENDERBUFFER_DRAW, true);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, destination);
 
 		glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, w, h, ConvertAttachmentToBitfield(copyType), GL_NEAREST);
