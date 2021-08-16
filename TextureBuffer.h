@@ -17,6 +17,8 @@ namespace Backend {
 
 			GLuint& GetNativeHandle() { return mTextureRef; }
 
+			TextureFormat GetFormat() { return mFormat; }
+
 			// PLACEHOLDER
 			void BindForRendering(int level = 0);
 

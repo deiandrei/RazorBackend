@@ -20,13 +20,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DataBuffer.cpp" />
+    <ClCompile Include="Pipeline.cpp" />
     <ClCompile Include="RenderBuffer.cpp" />
+    <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="TextureBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataBuffer.h" />
     <ClInclude Include="include.h" />
+    <ClInclude Include="Pipeline.h" />
     <ClInclude Include="RenderBuffer.h" />
+    <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="TextureBuffer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

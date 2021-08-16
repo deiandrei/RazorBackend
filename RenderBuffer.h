@@ -5,6 +5,9 @@
 #include "TextureBuffer.h"
 
 namespace Backend {
+	class Pipeline;
+	class RenderBuffer;
+	class RenderBufferSlot;
 
 	enum AttachmentType { ATTACHMENT_DEPTH, ATTACHMENT_STENCIL, ATTACHMENT_COLOR };
 	enum BindingType { RENDERBUFFER_READ, RENDERBUFFER_DRAW, RENDERBUFFER_READWRITE };
@@ -35,8 +38,7 @@ namespace Backend {
 			RenderBuffer(const glm::vec2& size) : RenderBuffer(size.x, size.y) { }
 			~RenderBuffer();
 
-			// PLACEHOLDER
-			GLuint GetNativeHandle() { return mBufferHandle; }
+			void Resize(int w, int h);
 
 			// Attachments
 			RenderBuffer* AddSlot(const std::string& name, AttachmentType type, TextureBuffer* tex);
@@ -79,6 +81,8 @@ namespace Backend {
 			int mLastWidth, mLastHeight;
 			GLint mLastRBHandle;
 			bool mUsedSave;
+
+			friend class Pipeline;
 
 	};
 

@@ -20,6 +20,17 @@ namespace Backend {
 		//todo
 	}
 
+	void RenderBuffer::Resize(int w, int h) {
+		mWidth = w;
+		mHeight = h;
+
+		for (auto slot : mSlots) {
+			if (slot.second->mOwnedByRenderbuffer) {
+				slot.second->mTexture->CreateFromFormat(slot.second->mTexture->GetFormat(), w, h);
+			}
+		}
+	}
+
 	void RenderBuffer::Bind(BindingType bindType, bool saveLastRB) {
 		if (saveLastRB) {
 			GLint vp[4]; glGetIntegerv(GL_VIEWPORT, vp);

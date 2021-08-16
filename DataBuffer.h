@@ -4,6 +4,7 @@
 #include "include.h"
 
 namespace Backend {
+	class Pipeline;
 	class DataBuffer;
 	class BufferSlot;
 	class BufferSlotDescriptor;
@@ -68,19 +69,15 @@ namespace Backend {
 			DataBuffer();
 			~DataBuffer();
 
-			// PLACEHOLDER HELPERS: until the abstraction is fully done
-			void Bind() { glBindVertexArray(mArrayBufferHandle); }
-			void BindForRendering() { Bind(); glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndicesSlotHandle); }
-			//
-
-			GLuint GetNativeHandle() { return mArrayBufferHandle; }
-
 			void UploadIndices(const void* indicesPtr, unsigned int dataSize);
 			BufferSlot* AddBufferSlot(const std::string& name, bool dynamicSlot = false);
 			BufferSlot* GetBufferSlot(const std::string& name);
 
 			// Utility functions
 			void UploadIndices(const std::vector<unsigned int>& indices) { UploadIndices(&indices[0], (unsigned int)(sizeof(indices[0]) * indices.size())); }
+			
+		protected:
+			void Bind() { glBindVertexArray(mArrayBufferHandle); }
 
 		protected:
 			GLuint mArrayBufferHandle;
@@ -91,6 +88,7 @@ namespace Backend {
 			int mAttributeCount;
 
 			friend class BufferSlot;
+			friend class Pipeline;
 
 	};
 
