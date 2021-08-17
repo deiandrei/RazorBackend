@@ -9,6 +9,7 @@ namespace Backend {
 
 	class DataBuffer;
 	class ShaderProgram;
+	class RenderBuffer;
 
 	enum CullingMode { CULL_NONE, CULL_FRONT, CULL_BACK, CULL_FRONT_AND_BACK };
 	enum BlendingMode { BLEND_NONE, BLEND_DEFAULT }; // todo: implement all blend modes
@@ -21,6 +22,10 @@ namespace Backend {
 		DepthTestMode DepthMode;
 
 		ShaderProgram* Shader;
+
+		PipelineState() {
+			Shader = nullptr;
+		}
 
 		void operator=(const PipelineState& other) {
 			CullMode = other.CullMode;
@@ -35,17 +40,22 @@ namespace Backend {
 			Pipeline(int screenWidth, int screenHeight);
 			~Pipeline() { }
 
+			RenderBuffer* DefaultRenderBuffer;
+			void SetRenderBuffer(RenderBuffer* rb);
+
 			PipelineState State;
+
+			void SaveState();
+			void RestoreState();
 
 			void RenderV(RenderMode mode, DataBuffer* buffer, int count, int startOffset = 0);
 			void RenderI(RenderMode mode, DataBuffer* buffer, int count, int startOffset = 0);
 			void RenderI(RenderMode mode, DataBuffer* buffer, int count, int indicesOffset, int verticesOffset);
 
-			
-
 		protected:
 			GLenum ConvertRenderModeToNative(RenderMode mode);
 
+			void CreateDefaultRB(int w, int h);
 			void CheckStateChanges();
 
 			void SetShaderNative();
@@ -55,6 +65,9 @@ namespace Backend {
 
 		protected:
 			PipelineState mLastState;
+			RenderBuffer* mCurrentRB;
+
+			std::vector<PipelineState> mSavedStates;
 
 	};
 

@@ -1,6 +1,7 @@
 #include "Pipeline.h"
 
 #include "DataBuffer.h"
+#include "RenderBuffer.h"
 #include "ShaderProgram.h"
 
 namespace Backend {
@@ -10,11 +11,27 @@ namespace Backend {
 		State.DepthMode = DepthTestMode::DEPTH_READ_WRITE;
 		State.Shader = nullptr;
 
-		mLastState = State;
+		mLastState.BlendMode = BlendingMode::BLEND_NONE;
+		mLastState.CullMode = CullingMode::CULL_NONE;
+		mLastState.DepthMode = DepthTestMode::DEPTH_OFF;
+		mLastState.Shader = nullptr;
+		
+		mCurrentRB = DefaultRenderBuffer;
 
 		SetCullModeNative();
 		SetBlendModeNative();
 		SetDepthModeNative();
+	}
+
+	void Pipeline::SaveState() {
+		mSavedStates.push_back(State);
+	}
+
+	void Pipeline::RestoreState() {
+		if (mSavedStates.empty()) return;
+
+		State = mSavedStates.back();
+		mSavedStates.pop_back();
 	}
 
 	void Pipeline::RenderV(RenderMode mode, DataBuffer* buffer, int count, int startOffset) {
@@ -61,6 +78,12 @@ namespace Backend {
 		}
 	}
 
+	void Pipeline::CreateDefaultRB(int w, int h) {
+		DefaultRenderBuffer = new RenderBuffer(w, h);
+		glDeleteFramebuffers(1, &DefaultRenderBuffer->mBufferHandle);
+		DefaultRenderBuffer->mBufferHandle = 0;
+	}
+
 	void Pipeline::CheckStateChanges() {
 		bool changed = false;
 
@@ -93,6 +116,26 @@ namespace Backend {
 		}
 		else {
 			glUseProgram(0);
+		}
+	}
+
+	void Pipeline::SetRenderBuffer(RenderBuffer* rb) {
+		if (!rb) mCurrentRB = DefaultRenderBuffer;
+
+		if (rb != mCurrentRB) {
+			int lastWidth = mCurrentRB->GetWidth();
+			int lastHeight = mCurrentRB->GetHeight();
+
+			int width = rb->GetWidth();
+			int height = rb->GetHeight();
+
+			if (lastWidth != width || lastHeight != height) {
+				glViewport(0, 0, width, height);
+			}
+
+			glBindFramebuffer(GL_FRAMEBUFFER, rb->mBufferHandle);
+
+			mCurrentRB = rb;
 		}
 	}
 
