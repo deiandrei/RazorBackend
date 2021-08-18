@@ -91,19 +91,6 @@ namespace Backend {
 		this->Unbind();
 	}
 
-	void RenderBuffer::Clear(bool clearColor, bool clearDepth, bool clearStencil) {
-		GLbitfield clearMaskNative = 0;
-		if (clearColor) clearMaskNative = clearMaskNative | GL_COLOR_BUFFER_BIT;
-		if (clearDepth) clearMaskNative = clearMaskNative | GL_DEPTH_BUFFER_BIT;
-		if (clearStencil) clearMaskNative = clearMaskNative | GL_STENCIL_BUFFER_BIT;
-		
-		glClear(clearMaskNative);
-	}
-
-	void RenderBuffer::SetClearColor(const glm::vec4 color) {
-		glClearColor(color.x, color.y, color.z, color.w);
-	}
-
 	void RenderBuffer::AddSlotImpl(const std::string& name, AttachmentType type, TextureBuffer* tex, bool owned) {
 		// check if there is already an attachment with this type, we can only have 1 depth/stencil attachment
 		if (type != AttachmentType::ATTACHMENT_COLOR) {

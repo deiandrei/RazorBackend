@@ -6,17 +6,16 @@
 
 namespace Backend {
 	Pipeline::Pipeline(int screenWidth, int screenHeight) {
-		State.BlendMode = BlendingMode::BLEND_NONE;
-		State.CullMode = CullingMode::CULL_NONE;
-		State.DepthMode = DepthTestMode::DEPTH_READ_WRITE;
-		State.Shader = nullptr;
+		CreateDefaultRB(screenWidth, screenHeight);
 
 		mLastState.BlendMode = BlendingMode::BLEND_NONE;
 		mLastState.CullMode = CullingMode::CULL_NONE;
 		mLastState.DepthMode = DepthTestMode::DEPTH_OFF;
 		mLastState.Shader = nullptr;
-		
-		mCurrentRB = DefaultRenderBuffer;
+		mLastState.Renderbuffer = DefaultRenderBuffer;
+
+		State = mLastState;
+		State.DepthMode = DepthTestMode::DEPTH_READ_WRITE;
 
 		SetCullModeNative();
 		SetBlendModeNative();
@@ -92,6 +91,11 @@ namespace Backend {
 			changed = true;
 		}
 
+		if (State.Renderbuffer != mLastState.Renderbuffer) {
+			SetRenderbufferNative();
+			changed = true;
+		}
+
 		if (State.CullMode != mLastState.CullMode) {
 			SetCullModeNative();
 			changed = true;
@@ -119,24 +123,40 @@ namespace Backend {
 		}
 	}
 
-	void Pipeline::SetRenderBuffer(RenderBuffer* rb) {
-		if (!rb) mCurrentRB = DefaultRenderBuffer;
+	void Pipeline::SetRenderbufferNative() {
+		if (!State.Renderbuffer) State.Renderbuffer = DefaultRenderBuffer;
 
-		if (rb != mCurrentRB) {
-			int lastWidth = mCurrentRB->GetWidth();
-			int lastHeight = mCurrentRB->GetHeight();
+		if (State.Renderbuffer != mLastState.Renderbuffer) {
+			int lastWidth = mLastState.Renderbuffer->GetWidth();
+			int lastHeight = mLastState.Renderbuffer->GetHeight();
 
-			int width = rb->GetWidth();
-			int height = rb->GetHeight();
+			int width = State.Renderbuffer->GetWidth();
+			int height = State.Renderbuffer->GetHeight();
 
 			if (lastWidth != width || lastHeight != height) {
 				glViewport(0, 0, width, height);
 			}
 
-			glBindFramebuffer(GL_FRAMEBUFFER, rb->mBufferHandle);
-
-			mCurrentRB = rb;
+			glBindFramebuffer(GL_FRAMEBUFFER, State.Renderbuffer->mBufferHandle);
 		}
+	}
+
+	void Pipeline::ClearBuffer(bool clearColor, bool clearDepth, bool clearStencil) {
+		if (State.Renderbuffer != mLastState.Renderbuffer) {
+			SetRenderbufferNative();
+			mLastState.Renderbuffer = State.Renderbuffer;
+		}
+
+		GLbitfield clearMaskNative = 0;
+		if (clearColor) clearMaskNative = clearMaskNative | GL_COLOR_BUFFER_BIT;
+		if (clearDepth) clearMaskNative = clearMaskNative | GL_DEPTH_BUFFER_BIT;
+		if (clearStencil) clearMaskNative = clearMaskNative | GL_STENCIL_BUFFER_BIT;
+
+		glClear(clearMaskNative);
+	}
+
+	void Pipeline::SetClearColor(float r, float g, float b, float a) {
+		glClearColor(r, g, b, a);
 	}
 
 	void Pipeline::SetCullModeNative() {

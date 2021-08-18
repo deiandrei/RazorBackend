@@ -22,6 +22,7 @@ namespace Backend {
 		DepthTestMode DepthMode;
 
 		ShaderProgram* Shader;
+		RenderBuffer* Renderbuffer;
 
 		PipelineState() {
 			Shader = nullptr;
@@ -32,6 +33,7 @@ namespace Backend {
 			BlendMode = other.BlendMode;
 			DepthMode = other.DepthMode;
 			Shader = other.Shader;
+			Renderbuffer = other.Renderbuffer;
 		}
 	};
 
@@ -41,16 +43,21 @@ namespace Backend {
 			~Pipeline() { }
 
 			RenderBuffer* DefaultRenderBuffer;
-			void SetRenderBuffer(RenderBuffer* rb);
 
+			// State setup and history
 			PipelineState State;
 
 			void SaveState();
 			void RestoreState();
 
+			// Rendering stuff
 			void RenderV(RenderMode mode, DataBuffer* buffer, int count, int startOffset = 0);
 			void RenderI(RenderMode mode, DataBuffer* buffer, int count, int startOffset = 0);
 			void RenderI(RenderMode mode, DataBuffer* buffer, int count, int indicesOffset, int verticesOffset);
+
+			// Render buffer stuff
+			void SetClearColor(float r, float g, float b, float a);
+			void ClearBuffer(bool clearColor = true, bool clearDepth = true, bool clearStencil = false);
 
 		protected:
 			GLenum ConvertRenderModeToNative(RenderMode mode);
@@ -59,13 +66,13 @@ namespace Backend {
 			void CheckStateChanges();
 
 			void SetShaderNative();
+			void SetRenderbufferNative();
 			void SetCullModeNative();
 			void SetBlendModeNative();
 			void SetDepthModeNative();
 
 		protected:
 			PipelineState mLastState;
-			RenderBuffer* mCurrentRB;
 
 			std::vector<PipelineState> mSavedStates;
 

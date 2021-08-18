@@ -63,9 +63,6 @@ namespace Backend {
 			int GetWidth() { return mWidth; }
 			int GetHeight() { return mHeight; }
 
-			static void Clear(bool clearColor, bool clearDepth, bool clearStencil);
-			static void SetClearColor(const glm::vec4 color);
-
 		private:
 			void AddSlotImpl(const std::string& name, AttachmentType type, TextureBuffer* tex, bool owned);
 			static GLbitfield ConvertAttachmentToBitfield(AttachmentType type);
