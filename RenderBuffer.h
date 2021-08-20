@@ -35,7 +35,6 @@ namespace Backend {
 
 		public:
 			RenderBuffer(int w, int h);
-			RenderBuffer(const glm::vec2& size) : RenderBuffer(size.x, size.y) { }
 			~RenderBuffer();
 
 			void Resize(int w, int h);
@@ -54,11 +53,7 @@ namespace Backend {
 			RenderBuffer* UseAllSlotsToDraw();
 
 			// Basic stuff
-			void Bind(BindingType bindType = BindingType::RENDERBUFFER_READWRITE, bool saveLastRB = false);
-			void Unbind();
-
 			void Copy(RenderBuffer* destination, AttachmentType copyType);
-			void CopyLegacy(GLuint destination, int w, int h, AttachmentType copyType);
 
 			int GetWidth() { return mWidth; }
 			int GetHeight() { return mHeight; }
@@ -67,6 +62,8 @@ namespace Backend {
 			void AddSlotImpl(const std::string& name, AttachmentType type, TextureBuffer* tex, bool owned);
 			static GLbitfield ConvertAttachmentToBitfield(AttachmentType type);
 
+			void Bind();
+
 		private:
 			GLuint mBufferHandle;
 			int mWidth, mHeight;
@@ -74,12 +71,7 @@ namespace Backend {
 			std::map<std::string, RenderBufferSlot*> mSlots;
 			unsigned int mColorAttachmentsCount;
 
-			// Save data, until I implement the state machine
-			int mLastWidth, mLastHeight;
-			GLint mLastRBHandle;
-			bool mUsedSave;
-
-			friend class Pipeline;
+			friend class Context;
 
 	};
 

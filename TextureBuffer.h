@@ -19,9 +19,6 @@ namespace Backend {
 
 			TextureFormat GetFormat() { return mFormat; }
 
-			// PLACEHOLDER
-			void BindForRendering(int level = 0);
-
 			// Data
 			TextureBuffer* CreateFromFormat(TextureFormat format, int width, int height);
 			TextureBuffer* UploadData(const void* dataPtr, int width, int height, int numComponents, bool srgb = false);
@@ -33,6 +30,8 @@ namespace Backend {
 			TextureBuffer* SetWrapH(TextureWrapType type);
 			TextureBuffer* SetWrapVH(TextureWrapType vWrapType, TextureWrapType hWrapType);
 
+			TextureBuffer* SetBorderColor(float r, float g, float b, float a);
+
 			// Filter
 			TextureBuffer* SetFilterMin(TextureFilter filter, MipmapFilter mipmapFilter = MipmapFilter::MIPMAP_FILTER_NONE);
 			TextureBuffer* SetFilterMag(TextureFilter filter, MipmapFilter mipmapFilter = MipmapFilter::MIPMAP_FILTER_NONE);
@@ -40,9 +39,11 @@ namespace Backend {
 
 		private:
 			void Bind();
+			void BindForRendering(int level = 0);
 
 			void SetWrapImpl(GLenum wrap, TextureWrapType wrapType);
 			void SetFilterImpl(GLenum filter, TextureFilter filterType, MipmapFilter mipmapFilterType);
+			void SetBorderColorImpl(float r, float g, float b, float a);
 
 			std::pair<GLenum, GLenum> ConvertFormatToNative(TextureFormat format);
 
@@ -53,6 +54,8 @@ namespace Backend {
 			TextureWrapType mVWrap, mHWrap;
 			TextureFilter mMinFilter, mMagFilter;
 			MipmapFilter mMinMipmapFilter, mMagMipmapFilter;
+
+			friend class Context;
 
 	};
 

@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DataBuffer.cpp" />
-    <ClCompile Include="Pipeline.cpp" />
+    <ClCompile Include="Context.cpp" />
     <ClCompile Include="RenderBuffer.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="TextureBuffer.cpp" />
@@ -28,7 +28,7 @@
   <ItemGroup>
     <ClInclude Include="DataBuffer.h" />
     <ClInclude Include="include.h" />
-    <ClInclude Include="Pipeline.h" />
+    <ClInclude Include="Context.h" />
     <ClInclude Include="RenderBuffer.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="TextureBuffer.h" />

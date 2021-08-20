@@ -27,7 +27,7 @@
     <ClCompile Include="ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Pipeline.cpp">
+    <ClCompile Include="Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,7 +47,7 @@
     <ClInclude Include="ShaderProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Pipeline.h">
+    <ClInclude Include="Context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

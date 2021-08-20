@@ -88,7 +88,7 @@ namespace Backend {
 			int mAttributeCount;
 
 			friend class BufferSlot;
-			friend class Pipeline;
+			friend class Context;
 
 	};
 

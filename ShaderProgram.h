@@ -81,7 +81,7 @@ namespace Backend {
 			std::map<ShaderSlotType, ShaderSlot*> mSlots;
 			std::vector<std::string> mAttributes;
 
-			friend class Pipeline;
+			friend class Context;
 
 	};
 

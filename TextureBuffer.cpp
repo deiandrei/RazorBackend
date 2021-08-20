@@ -77,8 +77,7 @@ namespace Backend {
 		if (wrapType == TextureWrapType::WRAP_NONE) {
 			wrapTypeNative = GL_CLAMP_TO_BORDER;
 
-			float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &color[0]);
+			SetBorderColorImpl(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 		else if (wrapType == TextureWrapType::WRAP_REPEAT) {
 			wrapTypeNative = GL_REPEAT;
@@ -119,6 +118,11 @@ namespace Backend {
 		else return;
 
 		glTexParameteri(GL_TEXTURE_2D, filter, filterTypeNative);
+	}
+
+	void TextureBuffer::SetBorderColorImpl(float r, float g, float b, float a) {
+		float color[4] = { r, g, b, a };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &color[0]);
 	}
 
 	std::pair<GLenum, GLenum> TextureBuffer::ConvertFormatToNative(TextureFormat format)
@@ -192,6 +196,14 @@ namespace Backend {
 		SetWrapImpl(GL_TEXTURE_WRAP_S, vWrapType);
 		SetWrapImpl(GL_TEXTURE_WRAP_T, hWrapType);
 
+		return this;
+	}
+
+	TextureBuffer* TextureBuffer::SetBorderColor(float r, float g, float b, float a) {
+		Bind();
+
+		SetBorderColorImpl(r, g, b, a);
+		
 		return this;
 	}
 

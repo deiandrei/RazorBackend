@@ -11,9 +11,6 @@ namespace Backend {
 		mHeight = h;
 
 		mColorAttachmentsCount = 0;
-
-		// temp
-		mUsedSave = false;
 	}
 
 	RenderBuffer::~RenderBuffer() {
@@ -26,69 +23,38 @@ namespace Backend {
 
 		for (auto slot : mSlots) {
 			if (slot.second->mOwnedByRenderbuffer) {
-				slot.second->mTexture->CreateFromFormat(slot.second->mTexture->GetFormat(), w, h);
+				TextureFormat tempFormat = slot.second->mTexture->GetFormat();
+				slot.second->mTexture->CreateFromFormat(tempFormat, w, h);
 			}
-		}
-	}
-
-	void RenderBuffer::Bind(BindingType bindType, bool saveLastRB) {
-		if (saveLastRB) {
-			GLint vp[4]; glGetIntegerv(GL_VIEWPORT, vp);
-			mLastWidth = vp[2]; mLastHeight = vp[3];
-			glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &mLastRBHandle);
-			mUsedSave = true;
-		}
-
-		GLenum targetBindNative;
-		if (bindType == BindingType::RENDERBUFFER_DRAW) {
-			targetBindNative = GL_DRAW_FRAMEBUFFER;
-		}
-		else if (bindType == BindingType::RENDERBUFFER_READ) {
-			targetBindNative = GL_READ_FRAMEBUFFER;
-		}
-		else {
-			targetBindNative = GL_FRAMEBUFFER;
-		}
-
-		glBindFramebuffer(targetBindNative, mBufferHandle);
-
-		if (saveLastRB) {
-			if (mLastWidth != mWidth || mLastHeight != mHeight) glViewport(0, 0, mWidth, mHeight);
-		}
-	}
-
-	void RenderBuffer::Unbind() {
-		if (mUsedSave) {
-			mUsedSave = false;
-
-			glBindFramebuffer(GL_FRAMEBUFFER, mLastRBHandle);
-
-			if (mLastWidth != mWidth || mLastHeight != mHeight) glViewport(0, 0, mLastWidth, mLastHeight);
-		}
-		else {
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 	}
 
 	void RenderBuffer::Copy(RenderBuffer* destination, AttachmentType copyType) {
 		if (!destination) return;
 
-		this->Bind(BindingType::RENDERBUFFER_READ, true);
-		destination->Bind(BindingType::RENDERBUFFER_DRAW, true);
+		// save the last state
+		int tempWidth, tempHeight;
+		GLint vp[4], tempHandleNative;
+		glGetIntegerv(GL_VIEWPORT, vp); tempWidth = vp[2]; tempHeight = vp[3];
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &tempHandleNative);
+
+		int destWidth = destination->GetWidth();
+		int destHeight = destination->GetHeight();
+		
+		if (destWidth != tempWidth || destHeight != tempHeight) {
+			glViewport(0, 0, destWidth, destHeight);
+		}
+		
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, mBufferHandle);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, destination->mBufferHandle);
 
 		glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, destination->mWidth, destination->mHeight, ConvertAttachmentToBitfield(copyType), GL_NEAREST);
 
-		destination->Unbind();
-		this->Unbind();
-	}
-
-	void RenderBuffer::CopyLegacy(GLuint destination, int w, int h, AttachmentType copyType) {
-		this->Bind(BindingType::RENDERBUFFER_READ, true);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, destination);
-
-		glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, w, h, ConvertAttachmentToBitfield(copyType), GL_NEAREST);
-
-		this->Unbind();
+		// restore the last state
+		if (destWidth != tempWidth || destHeight != tempHeight) {
+			glViewport(0, 0, tempWidth, tempWidth);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, tempHandleNative);
 	}
 
 	void RenderBuffer::AddSlotImpl(const std::string& name, AttachmentType type, TextureBuffer* tex, bool owned) {
@@ -141,6 +107,10 @@ namespace Backend {
 		else {
 			return GL_COLOR_BUFFER_BIT;
 		}
+	}
+
+	void RenderBuffer::Bind() {
+		glBindFramebuffer(GL_FRAMEBUFFER, mBufferHandle);
 	}
 
 	RenderBuffer* RenderBuffer::AddSlot(const std::string& name, AttachmentType type, TextureBuffer* tex) {
@@ -214,7 +184,13 @@ namespace Backend {
 			}
 		}
 
-		glDrawBuffers((int)drawBuffersNative.size(), &drawBuffersNative[0]);
+		if (drawBuffersNative.empty()) {
+			glDrawBuffer(GL_NONE);
+		}
+		else {
+			glDrawBuffers((int)drawBuffersNative.size(), &drawBuffersNative[0]);
+		}
+
 
 		return this;
 	}
