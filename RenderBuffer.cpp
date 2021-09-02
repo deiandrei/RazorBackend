@@ -173,6 +173,43 @@ namespace Backend {
 		return this;
 	}
 
+	RenderBuffer* RenderBuffer::ReplaceSlotTexture(const std::string& name, TextureBuffer* tex, int level) {
+		if (mSlots.find(name) == mSlots.end() || !tex) return this;
+
+		auto slot = mSlots[name];
+
+		if (slot->mOwnedByRenderbuffer) {
+			delete slot->mTexture;
+		}
+
+		slot->mOwnedByRenderbuffer = false;
+		slot->mTexture = tex;
+
+		GLenum attachmentTypeNative;
+		if (slot->mType == AttachmentType::ATTACHMENT_DEPTH) {
+			attachmentTypeNative = GL_DEPTH_ATTACHMENT;
+		}
+		else if (slot->mType == AttachmentType::ATTACHMENT_STENCIL) {
+			attachmentTypeNative = GL_STENCIL_ATTACHMENT;
+		}
+		else if (slot->mType == AttachmentType::ATTACHMENT_COLOR) {
+			attachmentTypeNative = GL_COLOR_ATTACHMENT0 + slot->mColorAttID;
+		}
+		else return this;
+
+		// Setup the slot
+		Bind();
+
+		if (tex->GetType() == TextureType::TEXTURE_STANDARD) {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentTypeNative, GL_TEXTURE_2D, tex->GetNativeHandle(), level);
+		}
+		else if (tex->GetType() == TextureType::TEXTURE_CUBE) {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentTypeNative, GL_TEXTURE_CUBE_MAP_POSITIVE_X + level, tex->GetNativeHandle(), 0);
+		}
+
+		return this;
+	}
+
 	RenderBuffer* RenderBuffer::SetSlotsUsedToDraw(const std::vector<std::string>& slots) {
 		std::vector<GLuint> drawBuffersNative;
 		

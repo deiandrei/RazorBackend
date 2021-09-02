@@ -1,8 +1,14 @@
 #include "TextureBuffer.h"
 
 namespace Backend {
-	TextureBuffer::TextureBuffer() {
+	const GLenum TextureBuffer::TextureTypeConvertNative[2] = { GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP };
+	const GLenum TextureBuffer::InternalFormatConvertNative[TextureFormat::NUM_FORMATS] = { GL_R16F, GL_R, GL_RG16F, GL_RG, GL_RGB16F, GL_RGB, GL_RGBA16F, GL_RGBA, GL_SRGB, GL_SRGB_ALPHA, GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32 };
+	const GLenum TextureBuffer::FormatConvertNative[TextureFormat::NUM_FORMATS] = { GL_R, GL_R, GL_RG, GL_RG, GL_RGB, GL_RGB, GL_RGBA, GL_RGBA, GL_RGB, GL_RGBA, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT };
+
+	TextureBuffer::TextureBuffer(TextureType type) {
 		glGenTextures(1, &mTextureRef);
+
+		mType = type;
 
 		SetWrapVH(TextureWrapType::WRAP_REPEAT, TextureWrapType::WRAP_REPEAT);
 		SetFilterMinMag(TextureFilter::FILTER_NEAREST, TextureFilter::FILTER_NEAREST);
@@ -14,22 +20,44 @@ namespace Backend {
 	}
 
 	TextureBuffer* TextureBuffer::CreateFromFormat(TextureFormat format, int width, int height) {
-		auto formatConvert = ConvertFormatToNative(format);
 		mFormat = format;
 
 		Bind();
 
-		glTexImage2D(GL_TEXTURE_2D, 0, formatConvert.first, width, height, 0, formatConvert.second, GL_UNSIGNED_BYTE, NULL);
+		if (mType == TextureType::TEXTURE_STANDARD) {
+			glTexImage2D(TextureTypeConvertNative[mType], 0, InternalFormatConvertNative[format], width, height, 0, FormatConvertNative[format], GL_UNSIGNED_BYTE, NULL);
+		}
+		else if (mType == TextureType::TEXTURE_CUBE) {
+			for (int i = 0; i < 6; ++i) {
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, InternalFormatConvertNative[format], width, height, 0, FormatConvertNative[format], GL_UNSIGNED_BYTE, NULL);
+				
+			}
+		}
 
 		return this;
 	}
 
-	TextureBuffer* TextureBuffer::UploadData(const void* dataPtr, int width, int height, int numComponents, bool srgb) {
+	TextureBuffer* TextureBuffer::UploadSubData(const void* dataPtr, int width, int height, int xOffset, int yOffset, int layer) {
+		Bind();
+		
+		if (mType == TextureType::TEXTURE_STANDARD) {
+			glTexSubImage2D(TextureTypeConvertNative[mType], layer, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
+		}
+		else if (mType == TextureType::TEXTURE_CUBE) {
+			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + glm::clamp<int>(layer, 0, 5), 0, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
+		}
+
+		return this;
+	}
+
+	TextureBuffer* TextureBuffer::UploadData(const void* dataPtr, int width, int height, int numComponents, bool srgb, int layer) {
 		if (numComponents == 4) {
-			mFormat = TextureFormat::TEXTURE_RGBA;
+			if (srgb) mFormat = TextureFormat::TEXTURE_SRGBA;
+			else mFormat = TextureFormat::TEXTURE_RGBA;
 		}
 		else if (numComponents == 3) {
-			mFormat = TextureFormat::TEXTURE_RGB;
+			if (srgb) mFormat = TextureFormat::TEXTURE_SRGB;
+			else mFormat = TextureFormat::TEXTURE_RGB;
 		}
 		else if (numComponents == 2) {
 			mFormat = TextureFormat::TEXTURE_RG;
@@ -38,33 +66,37 @@ namespace Backend {
 			mFormat = TextureFormat::TEXTURE_R;
 		}
 
-		return UploadData(dataPtr, width, height, mFormat, srgb);
+		return UploadData(dataPtr, width, height, mFormat, layer);
 	}
 
-	TextureBuffer* TextureBuffer::UploadData(const void* dataPtr, int width, int height, TextureFormat format, bool srgb) {
+	TextureBuffer* TextureBuffer::UploadData(const void* dataPtr, int width, int height, TextureFormat format, int layer) {
 		Bind();
 
 		mFormat = format;
-		auto formatConvert = ConvertFormatToNative(mFormat);
-		if (srgb) {
-			if (formatConvert.first == TextureFormat::TEXTURE_RGB) formatConvert.first = GL_SRGB;
-			else if (formatConvert.first == TextureFormat::TEXTURE_RGBA) formatConvert.first = GL_SRGB_ALPHA;
+		
+		GLenum internalFormatNative = InternalFormatConvertNative[format];
+		GLenum formatNative = FormatConvertNative[format];
+
+		if (mType == TextureType::TEXTURE_STANDARD) {
+			glTexImage2D(TextureTypeConvertNative[mType], layer, internalFormatNative, width, height, 0, formatNative, GL_UNSIGNED_BYTE, dataPtr);
+		}
+		else if (mType == TextureType::TEXTURE_CUBE) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + glm::clamp<int>(layer, 0, 5), 0, internalFormatNative, width, height, 0, formatNative, GL_UNSIGNED_BYTE, dataPtr);
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, formatConvert.first, width, height, 0, formatConvert.second, GL_UNSIGNED_BYTE, dataPtr);
 		if (mMinMipmapFilter != MipmapFilter::MIPMAP_FILTER_NONE || mMagMipmapFilter != MipmapFilter::MIPMAP_FILTER_NONE) GenerateMipmap();
 
 		return this;
 	}
 
 	TextureBuffer* TextureBuffer::GenerateMipmap() {
-		glGenerateMipmap(GL_TEXTURE_2D);
+		glGenerateMipmap(TextureTypeConvertNative[mType]);
 
 		return this;
 	}
 
 	void TextureBuffer::Bind() {
-		glBindTexture(GL_TEXTURE_2D, mTextureRef);
+		glBindTexture(TextureTypeConvertNative[mType], mTextureRef);
 	}
 
 	void TextureBuffer::BindForRendering(int level) {
@@ -86,7 +118,7 @@ namespace Backend {
 			wrapTypeNative = GL_CLAMP_TO_EDGE;
 		}
 
-		glTexParameteri(GL_TEXTURE_2D, wrap, wrapTypeNative);
+		glTexParameteri(TextureTypeConvertNative[mType], wrap, wrapTypeNative);
 	}
 
 	void TextureBuffer::SetFilterImpl(GLenum filter, TextureFilter filterType, MipmapFilter mipmapType) {
@@ -117,57 +149,12 @@ namespace Backend {
 		}
 		else return;
 
-		glTexParameteri(GL_TEXTURE_2D, filter, filterTypeNative);
+		glTexParameteri(TextureTypeConvertNative[mType], filter, filterTypeNative);
 	}
 
 	void TextureBuffer::SetBorderColorImpl(float r, float g, float b, float a) {
 		float color[4] = { r, g, b, a };
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &color[0]);
-	}
-
-	std::pair<GLenum, GLenum> TextureBuffer::ConvertFormatToNative(TextureFormat format)
-	{
-		// Return = internalFormat, Format
-
-		if (format == TextureFormat::TEXTURE_R) {
-			return { GL_R, GL_R };
-		}
-		else if (format == TextureFormat::TEXTURE_R_16) {
-			return { GL_R16F, GL_RG };
-		}
-		else if (format == TextureFormat::TEXTURE_RG) {
-			return { GL_RG, GL_RG };
-		}
-		else if (format == TextureFormat::TEXTURE_RG_16) {
-			return { GL_RG16F, GL_RG };
-		}
-		else if (format == TextureFormat::TEXTURE_RGB) {
-			return { GL_RGB, GL_RGB };
-		}
-		else if (format == TextureFormat::TEXTURE_RGB_16) {
-			return { GL_RGB16F, GL_RGB };
-		}
-		else if (format == TextureFormat::TEXTURE_RGBA) {
-			return { GL_RGBA, GL_RGBA };
-		}
-		else if (format == TextureFormat::TEXTURE_RGBA_16) {
-			return { GL_RGBA16F, GL_RGBA };
-		}
-		else if (format == TextureFormat::TEXTURE_DEPTH_16) {
-			return { GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT };
-		}
-		else if (format == TextureFormat::TEXTURE_DEPTH_24) {
-			return { GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT };
-		}
-		else if (format == TextureFormat::TEXTURE_DEPTH_32) {
-			return { GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT };
-		}
-		/*else if (format == TextureFormat::TEXTURE_STENCIL) {
-			formatNative = GL_STENCIL_COMPONENTS;
-			internalformatNative = GL_DEPTH_COMPONENT16;
-		}*/
-
-		return { 0, 0 };
+		glTexParameterfv(TextureTypeConvertNative[mType], GL_TEXTURE_BORDER_COLOR, &color[0]);
 	}
 
 	TextureBuffer* TextureBuffer::SetWrapV(TextureWrapType type) {

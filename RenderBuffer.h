@@ -49,6 +49,8 @@ namespace Backend {
 			RenderBuffer* DeleteSlot(const std::string& name);
 			RenderBuffer* DeleteSlotByType(AttachmentType type);
 
+			RenderBuffer* ReplaceSlotTexture(const std::string& name, TextureBuffer* tex, int level = 0);
+
 			RenderBuffer* SetSlotsUsedToDraw(const std::vector<std::string>& slots);
 			RenderBuffer* UseAllSlotsToDraw();
 

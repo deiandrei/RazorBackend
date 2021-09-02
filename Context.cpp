@@ -42,7 +42,11 @@ namespace Backend {
 	void Context::RenderV(RenderMode mode, DataBuffer* buffer, int count, int startOffset) {
 		GLenum renderTypeNative = ConvertRenderModeToNative(mode);
 
-		glBindVertexArray(buffer->mArrayBufferHandle);
+		if (buffer != mCurrentState.Databuffer) {
+			glBindVertexArray(buffer->mArrayBufferHandle);
+
+			mCurrentState.Databuffer = buffer;
+		}
 
 		glDrawArrays(renderTypeNative, startOffset, count);
 	}
@@ -50,8 +54,12 @@ namespace Backend {
 	void Context::RenderI(RenderMode mode, DataBuffer* buffer, int count, int startOffset) {
 		GLenum renderTypeNative = ConvertRenderModeToNative(mode);
 
-		glBindVertexArray(buffer->mArrayBufferHandle);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
+		if (buffer != mCurrentState.Databuffer) {
+			glBindVertexArray(buffer->mArrayBufferHandle);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
+
+			mCurrentState.Databuffer = buffer;
+		}
 
 		glDrawElements(renderTypeNative, count, GL_UNSIGNED_INT, (const void*) startOffset);
 	}
@@ -59,8 +67,12 @@ namespace Backend {
 	void Context::RenderI(RenderMode mode, DataBuffer* buffer, int count, int indicesOffset, int verticesOffset) {
 		GLenum renderTypeNative = ConvertRenderModeToNative(mode);
 
-		glBindVertexArray(buffer->mArrayBufferHandle);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
+		if (buffer != mCurrentState.Databuffer) {
+			glBindVertexArray(buffer->mArrayBufferHandle);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
+
+			mCurrentState.Databuffer = buffer;
+		}
 
 		glDrawElementsBaseVertex(renderTypeNative, count, GL_UNSIGNED_INT, (void*)indicesOffset, verticesOffset);
 	}
@@ -71,6 +83,9 @@ namespace Backend {
 		}
 		else if (mode == RenderMode::RENDER_LINES) {
 			return GL_LINES;
+		}
+		else if (mode == RenderMode::RENDER_LINES_STRIP) {
+			return GL_LINE_STRIP;
 		}
 		else {
 			return GL_POINTS;

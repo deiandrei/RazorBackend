@@ -15,7 +15,7 @@ namespace Backend {
 	enum CullingMode { CULL_NONE, CULL_FRONT, CULL_BACK, CULL_FRONT_AND_BACK };
 	enum BlendingMode { BLEND_NONE, BLEND_DEFAULT }; // todo: implement all blend modes
 	enum DepthTestMode { DEPTH_OFF, DEPTH_READ_ONLY, DEPTH_READ_WRITE };
-	enum RenderMode { RENDER_LINES, RENDER_TRIANGLES };
+	enum RenderMode { RENDER_LINES, RENDER_LINES_STRIP, RENDER_TRIANGLES };
 
 	struct TextureBindKey {
 		TextureBuffer* Texture;
@@ -29,6 +29,8 @@ namespace Backend {
 		}
 	};
 
+	using TextureBindVector = std::vector<TextureBindKey>;
+
 	class Context {
 		protected:
 			struct ContextState {
@@ -37,9 +39,11 @@ namespace Backend {
 				DepthTestMode DepthMode;
 				ShaderProgram* Shader;
 				RenderBuffer* Renderbuffer;
+				DataBuffer* Databuffer;
 
 				ContextState() {
 					Shader = nullptr;
+					Databuffer = nullptr;
 				}
 
 				void operator=(const ContextState& other) {
@@ -48,6 +52,7 @@ namespace Backend {
 					DepthMode = other.DepthMode;
 					Shader = other.Shader;
 					Renderbuffer = other.Renderbuffer;
+					Databuffer = other.Databuffer;
 				}
 			};
 
@@ -76,7 +81,7 @@ namespace Backend {
 			void RenderI(RenderMode mode, DataBuffer* buffer, int count, int indicesOffset, int verticesOffset);
 
 			void SetTextures(const std::vector<std::pair<int, TextureBuffer*>>& textures);
-			void BindTextures(const std::vector<TextureBindKey>& textures);
+			void BindTextures(const TextureBindVector& textures);
 
 			// Render buffer stuff
 			void SetRenderbuffer(RenderBuffer* rb);
