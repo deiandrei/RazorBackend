@@ -37,20 +37,24 @@ namespace Backend {
 		return this;
 	}
 
-	TextureBuffer* TextureBuffer::UploadSubData(const void* dataPtr, int width, int height, int xOffset, int yOffset, int layer) {
+	TextureBuffer* TextureBuffer::UploadSubData(const void* dataPtr, int width, int height, int xOffset, int yOffset, TextureFace face, int layer) {
 		Bind();
 		
 		if (mType == TextureType::TEXTURE_STANDARD) {
-			glTexSubImage2D(TextureTypeConvertNative[mType], 0, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
+			glTexSubImage2D(TextureTypeConvertNative[mType], layer, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
 		}
 		else if (mType == TextureType::TEXTURE_CUBE) {
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + glm::clamp<int>(layer, 0, 5), 0, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
+			if (face == TextureFace::TEXTURE_FACE_PLANE) return this;
+
+			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, layer, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
 		}
 
 		return this;
 	}
 
-	TextureBuffer* TextureBuffer::UploadData(const void* dataPtr, int width, int height, int numComponents, bool srgb, int layer) {
+	TextureBuffer* TextureBuffer::UploadData(const void* dataPtr, int width, int height, int numComponents, bool srgb, TextureFace face, int layer) {
+		Bind();
+
 		if (numComponents == 4) {
 			if (srgb) mFormat = TextureFormat::TEXTURE_SRGBA;
 			else mFormat = TextureFormat::TEXTURE_RGBA;
@@ -66,25 +70,15 @@ namespace Backend {
 			mFormat = TextureFormat::TEXTURE_R;
 		}
 
-		return UploadData(dataPtr, width, height, mFormat, layer);
+		UploadDataImpl(dataPtr, width, height, mFormat, face, layer);
+
+		return this;
 	}
 
-	TextureBuffer* TextureBuffer::UploadData(const void* dataPtr, int width, int height, TextureFormat format, int layer) {
+	TextureBuffer* TextureBuffer::UploadData(const void* dataPtr, int width, int height, TextureFormat format, TextureFace face, int layer) {
 		Bind();
 
-		mFormat = format;
-		
-		GLenum internalFormatNative = InternalFormatConvertNative[format];
-		GLenum formatNative = FormatConvertNative[format];
-
-		if (mType == TextureType::TEXTURE_STANDARD) {
-			glTexImage2D(TextureTypeConvertNative[mType], layer, internalFormatNative, width, height, 0, formatNative, GL_UNSIGNED_BYTE, dataPtr);
-		}
-		else if (mType == TextureType::TEXTURE_CUBE) {
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + glm::clamp<int>(layer, 0, 5), 0, internalFormatNative, width, height, 0, formatNative, GL_UNSIGNED_BYTE, dataPtr);
-		}
-
-		if (mMinMipmapFilter != MipmapFilter::MIPMAP_FILTER_NONE || mMagMipmapFilter != MipmapFilter::MIPMAP_FILTER_NONE) GenerateMipmap();
+		UploadDataImpl(dataPtr, width, height, format, face, layer);
 
 		return this;
 	}
@@ -155,6 +149,27 @@ namespace Backend {
 	void TextureBuffer::SetBorderColorImpl(float r, float g, float b, float a) {
 		float color[4] = { r, g, b, a };
 		glTexParameterfv(TextureTypeConvertNative[mType], GL_TEXTURE_BORDER_COLOR, &color[0]);
+	}
+
+	void TextureBuffer::UploadDataImpl(const void* dataPtr, int width, int height, TextureFormat format, TextureFace face, int layer) {
+		mFormat = format;
+
+		GLenum internalFormatNative = InternalFormatConvertNative[format];
+		GLenum formatNative = FormatConvertNative[format];
+
+		if (mType == TextureType::TEXTURE_STANDARD) {
+			if (face != TextureFace::TEXTURE_FACE_PLANE) return;
+
+			glTexImage2D(TextureTypeConvertNative[mType], layer, internalFormatNative, width, height, 0, formatNative, GL_UNSIGNED_BYTE, dataPtr);
+		}
+		else if (mType == TextureType::TEXTURE_CUBE) {
+			if (face == TextureFace::TEXTURE_FACE_PLANE) return;
+
+			//do the smart conversion
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, layer, internalFormatNative, width, height, 0, formatNative, GL_UNSIGNED_BYTE, dataPtr);
+		}
+
+		if (mMinMipmapFilter != MipmapFilter::MIPMAP_FILTER_NONE || mMagMipmapFilter != MipmapFilter::MIPMAP_FILTER_NONE) GenerateMipmap();
 	}
 
 	TextureBuffer* TextureBuffer::SetWrapV(TextureWrapType type) {

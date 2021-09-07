@@ -22,6 +22,9 @@ namespace Backend {
 
 			AttachmentType mType;
 			TextureBuffer* mTexture;
+			TextureFace mFace;
+			int mLevel;
+
 			int mColorAttID;
 			bool mOwnedByRenderbuffer;
 
@@ -40,7 +43,7 @@ namespace Backend {
 			void Resize(int w, int h);
 
 			// Attachments
-			RenderBuffer* AddSlot(const std::string& name, AttachmentType type, TextureBuffer* tex);
+			RenderBuffer* AddSlot(const std::string& name, AttachmentType type, TextureBuffer* tex, TextureFace face = TextureFace::TEXTURE_FACE_PLANE, int level = 0);
 			RenderBuffer* AddSlot(const std::string& name, AttachmentType type, TextureFormat textureFormat);
 
 			RenderBufferSlot* GetSlot(const std::string& name);
@@ -49,7 +52,7 @@ namespace Backend {
 			RenderBuffer* DeleteSlot(const std::string& name);
 			RenderBuffer* DeleteSlotByType(AttachmentType type);
 
-			RenderBuffer* ReplaceSlotTexture(const std::string& name, TextureBuffer* tex, int level = 0);
+			RenderBuffer* ReplaceSlotTexture(const std::string& name, TextureBuffer* tex, TextureFace face = TextureFace::TEXTURE_FACE_PLANE, int level = 0);
 
 			RenderBuffer* SetSlotsUsedToDraw(const std::vector<std::string>& slots);
 			RenderBuffer* UseAllSlotsToDraw();
@@ -61,7 +64,7 @@ namespace Backend {
 			int GetHeight() { return mHeight; }
 
 		private:
-			void AddSlotImpl(const std::string& name, AttachmentType type, TextureBuffer* tex, bool owned);
+			void AddSlotImpl(const std::string& name, AttachmentType type, TextureBuffer* tex, TextureFace face, int level, bool owned);
 			static GLbitfield ConvertAttachmentToBitfield(AttachmentType type);
 
 			void Bind();

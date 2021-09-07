@@ -5,6 +5,7 @@
 
 namespace Backend {
 
+	enum TextureFace { TEXTURE_FACE_POSITIVE_X, TEXTURE_FACE_NEGATIVE_X, TEXTURE_FACE_POSITIVE_Y, TEXTURE_FACE_NEGATIVE_Y, TEXTURE_FACE_POSITIVE_Z, TEXTURE_FACE_NEGATIVE_Z, TEXTURE_FACE_PLANE };
 	enum TextureType { TEXTURE_STANDARD, TEXTURE_CUBE };
 	enum TextureFormat { TEXTURE_R_16, TEXTURE_R, TEXTURE_RG_16, TEXTURE_RG, TEXTURE_RGB_16, TEXTURE_RGB, TEXTURE_RGBA_16, TEXTURE_RGBA, TEXTURE_SRGB, TEXTURE_SRGBA, TEXTURE_DEPTH_16, TEXTURE_DEPTH_24, TEXTURE_DEPTH_32, TEXTURE_STENCIL, NUM_FORMATS };
 	enum TextureWrapType { WRAP_NONE, WRAP_REPEAT, WRAP_CLAMP };
@@ -25,9 +26,9 @@ namespace Backend {
 
 			// Data
 			TextureBuffer* CreateFromFormat(TextureFormat format, int width, int height);
-			TextureBuffer* UploadSubData(const void* dataPtr, int width, int height, int xOffset, int yOffset, int layer = 0);
-			TextureBuffer* UploadData(const void* dataPtr, int width, int height, int numComponents, bool srgb = false, int layer = 0);
-			TextureBuffer* UploadData(const void* dataPtr, int width, int height, TextureFormat format, int layer = 0);
+			TextureBuffer* UploadSubData(const void* dataPtr, int width, int height, int xOffset, int yOffset, TextureFace face = TextureFace::TEXTURE_FACE_PLANE, int layer = 0);
+			TextureBuffer* UploadData(const void* dataPtr, int width, int height, int numComponents, bool srgb = false, TextureFace face = TextureFace::TEXTURE_FACE_PLANE, int layer = 0);
+			TextureBuffer* UploadData(const void* dataPtr, int width, int height, TextureFormat format, TextureFace face = TextureFace::TEXTURE_FACE_PLANE, int layer = 0);
 			TextureBuffer* GenerateMipmap();
 
 			// Wrap
@@ -49,6 +50,7 @@ namespace Backend {
 			void SetWrapImpl(GLenum wrap, TextureWrapType wrapType);
 			void SetFilterImpl(GLenum filter, TextureFilter filterType, MipmapFilter mipmapFilterType);
 			void SetBorderColorImpl(float r, float g, float b, float a);
+			void UploadDataImpl(const void* dataPtr, int width, int height, TextureFormat format, TextureFace face, int layer);
 
 		private:
 			GLuint mTextureRef;

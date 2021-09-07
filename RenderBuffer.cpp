@@ -57,7 +57,7 @@ namespace Backend {
 		glBindFramebuffer(GL_FRAMEBUFFER, tempHandleNative);
 	}
 
-	void RenderBuffer::AddSlotImpl(const std::string& name, AttachmentType type, TextureBuffer* tex, bool owned) {
+	void RenderBuffer::AddSlotImpl(const std::string& name, AttachmentType type, TextureBuffer* tex, TextureFace face, int level, bool owned) {
 		// check if there is already an attachment with this type, we can only have 1 depth/stencil attachment
 		if (type != AttachmentType::ATTACHMENT_COLOR) {
 			for (auto& slot : mSlots) {
@@ -70,14 +70,14 @@ namespace Backend {
 		}
 
 		// Add the slot to the list
-		RenderBufferSlot* slot = new RenderBufferSlot;
+		RenderBufferSlot* slot = new RenderBufferSlot();
 		slot->mType = type;
+		slot->mLevel = level;
 		slot->mTexture = tex;
 		slot->mColorAttID = mColorAttachmentsCount++;
 		slot->mOwnedByRenderbuffer = owned;
 
 		mSlots.insert({ name, slot });
-
 
 		GLenum attachmentTypeNative;
 		if (type == AttachmentType::ATTACHMENT_DEPTH) {
@@ -94,7 +94,16 @@ namespace Backend {
 		// Setup the slot
 		Bind();
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentTypeNative, GL_TEXTURE_2D, tex->GetNativeHandle(), 0);
+		if (tex->GetType() == TextureType::TEXTURE_STANDARD) {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentTypeNative, GL_TEXTURE_2D, tex->GetNativeHandle(), level);
+		}
+		else if(tex->GetType() == TextureType::TEXTURE_CUBE) {
+			if (face == TextureFace::TEXTURE_FACE_PLANE) face = TextureFace::TEXTURE_FACE_POSITIVE_X;
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentTypeNative, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, tex->GetNativeHandle(), level);
+		}
+
+		slot->mFace = face;
 	}
 
 	GLbitfield RenderBuffer::ConvertAttachmentToBitfield(AttachmentType type) {
@@ -113,8 +122,8 @@ namespace Backend {
 		glBindFramebuffer(GL_FRAMEBUFFER, mBufferHandle);
 	}
 
-	RenderBuffer* RenderBuffer::AddSlot(const std::string& name, AttachmentType type, TextureBuffer* tex) {
-		AddSlotImpl(name, type, tex, false);
+	RenderBuffer* RenderBuffer::AddSlot(const std::string& name, AttachmentType type, TextureBuffer* tex, TextureFace face, int level) {
+		AddSlotImpl(name, type, tex, face, level, false);
 
 		return this;
 	}
@@ -123,7 +132,7 @@ namespace Backend {
 		TextureBuffer* tex = new TextureBuffer;
 		tex->CreateFromFormat(textureFormat, mWidth, mHeight)->SetFilterMinMag(TextureFilter::FILTER_LINEAR, TextureFilter::FILTER_LINEAR);
 
-		AddSlotImpl(name, type, tex, true);
+		AddSlotImpl(name, type, tex, TextureFace::TEXTURE_FACE_PLANE, 0, true);
 
 		return this;
 	}
@@ -173,7 +182,7 @@ namespace Backend {
 		return this;
 	}
 
-	RenderBuffer* RenderBuffer::ReplaceSlotTexture(const std::string& name, TextureBuffer* tex, int level) {
+	RenderBuffer* RenderBuffer::ReplaceSlotTexture(const std::string& name, TextureBuffer* tex, TextureFace face, int level) {
 		if (mSlots.find(name) == mSlots.end() || !tex) return this;
 
 		auto slot = mSlots[name];
@@ -184,6 +193,7 @@ namespace Backend {
 
 		slot->mOwnedByRenderbuffer = false;
 		slot->mTexture = tex;
+		slot->mLevel = level;
 
 		GLenum attachmentTypeNative;
 		if (slot->mType == AttachmentType::ATTACHMENT_DEPTH) {
@@ -204,8 +214,12 @@ namespace Backend {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentTypeNative, GL_TEXTURE_2D, tex->GetNativeHandle(), level);
 		}
 		else if (tex->GetType() == TextureType::TEXTURE_CUBE) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentTypeNative, GL_TEXTURE_CUBE_MAP_POSITIVE_X + level, tex->GetNativeHandle(), 0);
+			if (face == TextureFace::TEXTURE_FACE_PLANE) face = TextureFace::TEXTURE_FACE_POSITIVE_X;
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentTypeNative, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, tex->GetNativeHandle(), level);
 		}
+
+		slot->mFace = face;
 
 		return this;
 	}
