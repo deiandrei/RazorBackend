@@ -6,6 +6,7 @@ namespace Backend {
 		glGenVertexArrays(1, &mArrayBufferHandle);
 
 		mIndicesSlotHandle = 0;
+		mDynamicIndices = false;
 
 		mAttributeCount = 0;
 	}
@@ -18,7 +19,16 @@ namespace Backend {
 		}
 	}
 
-	void DataBuffer::UploadIndices(const void* indicesPtr, unsigned int dataSize) {
+	void DataBuffer::ReserveIndices(unsigned int size) {
+		mDynamicIndices = true;
+
+		if (!mIndicesSlotHandle) glGenBuffers(1, &mIndicesSlotHandle);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndicesSlotHandle);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+	}
+
+	void DataBuffer::UploadIndices(const void* indicesPtr, unsigned int dataSize, unsigned int dataOffset) {
 		if (dataSize == 0) return;
 
 		Bind();
@@ -26,7 +36,13 @@ namespace Backend {
 		if (!mIndicesSlotHandle) glGenBuffers(1, &mIndicesSlotHandle);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndicesSlotHandle);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indicesPtr, GL_STATIC_DRAW);
+
+		if (!mDynamicIndices) {
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indicesPtr, GL_STATIC_DRAW);
+		}
+		else {
+			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, dataOffset, dataSize, indicesPtr);
+		}
 
 	}
 

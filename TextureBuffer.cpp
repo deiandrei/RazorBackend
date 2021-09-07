@@ -41,7 +41,7 @@ namespace Backend {
 		Bind();
 		
 		if (mType == TextureType::TEXTURE_STANDARD) {
-			glTexSubImage2D(TextureTypeConvertNative[mType], layer, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
+			glTexSubImage2D(TextureTypeConvertNative[mType], 0, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
 		}
 		else if (mType == TextureType::TEXTURE_CUBE) {
 			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + glm::clamp<int>(layer, 0, 5), 0, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);

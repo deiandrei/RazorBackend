@@ -69,7 +69,8 @@ namespace Backend {
 			DataBuffer();
 			~DataBuffer();
 
-			void UploadIndices(const void* indicesPtr, unsigned int dataSize);
+			void ReserveIndices(unsigned int size);
+			void UploadIndices(const void* indicesPtr, unsigned int dataSize, unsigned int dataOffset = 0);
 			BufferSlot* AddBufferSlot(const std::string& name, bool dynamicSlot = false);
 			BufferSlot* GetBufferSlot(const std::string& name);
 
@@ -86,6 +87,7 @@ namespace Backend {
 			std::map<std::string, BufferSlot*> mSlots;
 
 			int mAttributeCount;
+			bool mDynamicIndices;
 
 			friend class BufferSlot;
 			friend class Context;

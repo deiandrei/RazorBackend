@@ -124,10 +124,10 @@ namespace Backend {
 		}
 	}
 	
-	void Context::SetRenderbuffer(RenderBuffer* rb) {
+	void Context::SetRenderbuffer(RenderBuffer* rb, bool setAnyway) {
 		if (!rb) rb = DefaultRenderBuffer;
 
-		if (rb != mCurrentState.Renderbuffer) {
+		if (setAnyway || rb != mCurrentState.Renderbuffer) {
 			int lastWidth = mCurrentState.Renderbuffer->GetWidth();
 			int lastHeight = mCurrentState.Renderbuffer->GetHeight();
 

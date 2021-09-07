@@ -84,7 +84,7 @@ namespace Backend {
 			void BindTextures(const TextureBindVector& textures);
 
 			// Render buffer stuff
-			void SetRenderbuffer(RenderBuffer* rb);
+			void SetRenderbuffer(RenderBuffer* rb, bool setAnyway = false);
 			void SetClearColor(float r, float g, float b, float a);
 			void ClearBuffer(bool clearColor = true, bool clearDepth = true, bool clearStencil = false);
 
