@@ -74,7 +74,6 @@ namespace Backend {
 		slot->mType = type;
 		slot->mLevel = level;
 		slot->mTexture = tex;
-		slot->mColorAttID = mColorAttachmentsCount++;
 		slot->mOwnedByRenderbuffer = owned;
 
 		mSlots.insert({ name, slot });
@@ -87,6 +86,7 @@ namespace Backend {
 			attachmentTypeNative = GL_STENCIL_ATTACHMENT;
 		}
 		else if (type == AttachmentType::ATTACHMENT_COLOR) {
+			slot->mColorAttID = mColorAttachmentsCount++;
 			attachmentTypeNative = GL_COLOR_ATTACHMENT0 + slot->mColorAttID;
 		}
 		else return;

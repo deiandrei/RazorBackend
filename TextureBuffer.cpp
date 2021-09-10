@@ -158,8 +158,6 @@ namespace Backend {
 		GLenum formatNative = FormatConvertNative[format];
 
 		if (mType == TextureType::TEXTURE_STANDARD) {
-			if (face != TextureFace::TEXTURE_FACE_PLANE) return;
-
 			glTexImage2D(TextureTypeConvertNative[mType], layer, internalFormatNative, width, height, 0, formatNative, GL_UNSIGNED_BYTE, dataPtr);
 		}
 		else if (mType == TextureType::TEXTURE_CUBE) {
