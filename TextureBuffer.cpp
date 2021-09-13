@@ -25,11 +25,11 @@ namespace Backend {
 		Bind();
 
 		if (mType == TextureType::TEXTURE_STANDARD) {
-			glTexImage2D(TextureTypeConvertNative[mType], 0, InternalFormatConvertNative[format], width, height, 0, FormatConvertNative[format], GL_UNSIGNED_BYTE, NULL);
+			glTexImage2D(TextureTypeConvertNative[mType], 0, InternalFormatConvertNative[format], width, height, 0, FormatConvertNative[format], GetDatatypeFromFormat(), NULL);
 		}
 		else if (mType == TextureType::TEXTURE_CUBE) {
 			for (int i = 0; i < 6; ++i) {
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, InternalFormatConvertNative[format], width, height, 0, FormatConvertNative[format], GL_UNSIGNED_BYTE, NULL);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, InternalFormatConvertNative[format], width, height, 0, FormatConvertNative[format], GetDatatypeFromFormat(), NULL);
 				
 			}
 		}
@@ -41,12 +41,12 @@ namespace Backend {
 		Bind();
 		
 		if (mType == TextureType::TEXTURE_STANDARD) {
-			glTexSubImage2D(TextureTypeConvertNative[mType], layer, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
+			glTexSubImage2D(TextureTypeConvertNative[mType], layer, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GetDatatypeFromFormat(), dataPtr);
 		}
 		else if (mType == TextureType::TEXTURE_CUBE) {
 			if (face == TextureFace::TEXTURE_FACE_PLANE) return this;
 
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, layer, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GL_UNSIGNED_BYTE, dataPtr);
+			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, layer, xOffset, yOffset, width, height, FormatConvertNative[mFormat], GetDatatypeFromFormat(), dataPtr);
 		}
 
 		return this;
@@ -96,6 +96,14 @@ namespace Backend {
 	void TextureBuffer::BindForRendering(int level) {
 		glActiveTexture(GL_TEXTURE0 + level);
 		Bind();
+	}
+
+	GLenum TextureBuffer::GetDatatypeFromFormat() {
+		if (mFormat == TextureFormat::TEXTURE_R_16 || mFormat == TextureFormat::TEXTURE_RG_16 || mFormat == TextureFormat::TEXTURE_RGB_16 || mFormat == TextureFormat::TEXTURE_RGBA_16) {
+			return GL_FLOAT;
+		}
+
+		return GL_UNSIGNED_BYTE;
 	}
 
 	void TextureBuffer::SetWrapImpl(GLenum wrap, TextureWrapType wrapType) {
@@ -158,13 +166,13 @@ namespace Backend {
 		GLenum formatNative = FormatConvertNative[format];
 
 		if (mType == TextureType::TEXTURE_STANDARD) {
-			glTexImage2D(TextureTypeConvertNative[mType], layer, internalFormatNative, width, height, 0, formatNative, GL_UNSIGNED_BYTE, dataPtr);
+			glTexImage2D(TextureTypeConvertNative[mType], layer, internalFormatNative, width, height, 0, formatNative, GetDatatypeFromFormat(), dataPtr);
 		}
 		else if (mType == TextureType::TEXTURE_CUBE) {
 			if (face == TextureFace::TEXTURE_FACE_PLANE) return;
 
 			//do the smart conversion
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, layer, internalFormatNative, width, height, 0, formatNative, GL_UNSIGNED_BYTE, dataPtr);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, layer, internalFormatNative, width, height, 0, formatNative, GetDatatypeFromFormat(), dataPtr);
 		}
 
 		if (mMinMipmapFilter != MipmapFilter::MIPMAP_FILTER_NONE || mMagMipmapFilter != MipmapFilter::MIPMAP_FILTER_NONE) GenerateMipmap();

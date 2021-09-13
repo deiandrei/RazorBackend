@@ -47,6 +47,8 @@ namespace Backend {
 			void Bind();
 			void BindForRendering(int level = 0);
 
+			GLenum GetDatatypeFromFormat();
+
 			void SetWrapImpl(GLenum wrap, TextureWrapType wrapType);
 			void SetFilterImpl(GLenum filter, TextureFilter filterType, MipmapFilter mipmapFilterType);
 			void SetBorderColorImpl(float r, float g, float b, float a);

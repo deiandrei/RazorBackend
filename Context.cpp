@@ -39,6 +39,12 @@ namespace Backend {
 		SetRenderbuffer(state.Renderbuffer);
 	}
 
+	void Context::FrameEnded() {
+		mCurrentState.Databuffer = nullptr;
+		mCurrentState.Shader = nullptr;
+		SetRenderbuffer(DefaultRenderBuffer, true);
+	}
+
 	void Context::RenderV(RenderMode mode, DataBuffer* buffer, int count, int startOffset) {
 		GLenum renderTypeNative = ConvertRenderModeToNative(mode);
 
@@ -56,7 +62,7 @@ namespace Backend {
 
 		if (buffer != mCurrentState.Databuffer) {
 			glBindVertexArray(buffer->mArrayBufferHandle);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
+			if(buffer->mIndicesSlotHandle) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
 
 			mCurrentState.Databuffer = buffer;
 		}
@@ -134,7 +140,7 @@ namespace Backend {
 			int width = rb->GetWidth();
 			int height = rb->GetHeight();
 
-			if (lastWidth != width || lastHeight != height) {
+			if (lastWidth != width || lastHeight != height || setAnyway) {
 				glViewport(0, 0, width, height);
 			}
 

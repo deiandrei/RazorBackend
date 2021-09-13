@@ -66,6 +66,8 @@ namespace Backend {
 			void SaveState();
 			void RestoreState();
 
+			void FrameEnded();
+
 			// Mode stuff
 			void SetCullMode(CullingMode mode);
 			void SetBlendMode(BlendingMode mode);
