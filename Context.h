@@ -12,6 +12,8 @@ namespace Backend {
 	class RenderBuffer;
 	class TextureBuffer;
 
+	enum TextureType;
+
 	enum CullingMode { CULL_NONE, CULL_FRONT, CULL_BACK, CULL_FRONT_AND_BACK };
 	enum BlendingMode { BLEND_NONE, BLEND_DEFAULT }; // todo: implement all blend modes
 	enum DepthTestMode { DEPTH_OFF, DEPTH_READ_ONLY, DEPTH_READ_WRITE };
@@ -66,7 +68,8 @@ namespace Backend {
 			void SaveState();
 			void RestoreState();
 
-			void FrameEnded();
+			void FrameBegin();
+			void FrameEnd();
 
 			// Mode stuff
 			void SetCullMode(CullingMode mode);
@@ -78,12 +81,17 @@ namespace Backend {
 			DepthTestMode DepthMode() { return mCurrentState.DepthMode; }
 
 			// Rendering stuff
-			void RenderV(RenderMode mode, DataBuffer* buffer, int count, int startOffset = 0);
-			void RenderI(RenderMode mode, DataBuffer* buffer, int count, int startOffset = 0);
-			void RenderI(RenderMode mode, DataBuffer* buffer, int count, int indicesOffset, int verticesOffset);
+			void SetDatabuffer(DataBuffer* buffer, bool forceSet = false);
 
-			void SetTextures(const std::vector<std::pair<int, TextureBuffer*>>& textures);
+			void RenderV(RenderMode mode, int count, int startOffset = 0);
+			void RenderI(RenderMode mode, int count, int startOffset = 0);
+			void RenderI(RenderMode mode, int count, int indicesOffset, int verticesOffset);
+
+			void BindTextures(const std::vector<std::pair<int, TextureBuffer*>>& textures);
 			void BindTextures(const TextureBindVector& textures);
+
+			void UnbindAllTextures();
+			void UnbindTexturesByType(TextureType type);
 
 			// Render buffer stuff
 			void SetRenderbuffer(RenderBuffer* rb, bool setAnyway = false);
@@ -104,16 +112,12 @@ namespace Backend {
 			void CreateDefaultRB(int w, int h);
 			//void CheckStateChanges();
 
-			void SetShaderNative();
-			void SetRenderbufferNative();
-			void SetCullModeNative();
-			void SetBlendModeNative();
-			void SetDepthModeNative();
 
 		protected:
 			ContextState mCurrentState;
 
 			std::vector<ContextState> mSavedStates;
+			bool mBoundTextures[32][2];
 
 	};
 

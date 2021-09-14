@@ -8,6 +8,8 @@ namespace Backend {
 	Context::Context(int screenWidth, int screenHeight) {
 		CreateDefaultRB(screenWidth, screenHeight);
 
+		memset(mBoundTextures, 0, sizeof(mBoundTextures));
+
 		// Set these values so the compare logic will work
 		mCurrentState.BlendMode = BlendingMode::BLEND_NONE;
 		mCurrentState.CullMode = CullingMode::CULL_NONE;
@@ -39,46 +41,32 @@ namespace Backend {
 		SetRenderbuffer(state.Renderbuffer);
 	}
 
-	void Context::FrameEnded() {
-		mCurrentState.Databuffer = nullptr;
-		mCurrentState.Shader = nullptr;
+	void Context::FrameBegin() {
+		UnbindAllTextures();
+
 		SetRenderbuffer(DefaultRenderBuffer, true);
+		SetDatabuffer(nullptr);
+		SetShader(nullptr);
 	}
 
-	void Context::RenderV(RenderMode mode, DataBuffer* buffer, int count, int startOffset) {
+	void Context::FrameEnd() {
+
+	}
+
+	void Context::RenderV(RenderMode mode, int count, int startOffset) {
 		GLenum renderTypeNative = ConvertRenderModeToNative(mode);
-
-		if (buffer != mCurrentState.Databuffer) {
-			glBindVertexArray(buffer->mArrayBufferHandle);
-
-			mCurrentState.Databuffer = buffer;
-		}
 
 		glDrawArrays(renderTypeNative, startOffset, count);
 	}
 
-	void Context::RenderI(RenderMode mode, DataBuffer* buffer, int count, int startOffset) {
+	void Context::RenderI(RenderMode mode, int count, int startOffset) {
 		GLenum renderTypeNative = ConvertRenderModeToNative(mode);
-
-		if (buffer != mCurrentState.Databuffer) {
-			glBindVertexArray(buffer->mArrayBufferHandle);
-			if(buffer->mIndicesSlotHandle) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
-
-			mCurrentState.Databuffer = buffer;
-		}
 
 		glDrawElements(renderTypeNative, count, GL_UNSIGNED_INT, (const void*) startOffset);
 	}
 
-	void Context::RenderI(RenderMode mode, DataBuffer* buffer, int count, int indicesOffset, int verticesOffset) {
+	void Context::RenderI(RenderMode mode, int count, int indicesOffset, int verticesOffset) {
 		GLenum renderTypeNative = ConvertRenderModeToNative(mode);
-
-		if (buffer != mCurrentState.Databuffer) {
-			glBindVertexArray(buffer->mArrayBufferHandle);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
-
-			mCurrentState.Databuffer = buffer;
-		}
 
 		glDrawElementsBaseVertex(renderTypeNative, count, GL_UNSIGNED_INT, (void*)indicesOffset, verticesOffset);
 	}
@@ -117,9 +105,52 @@ namespace Backend {
 		}
 	}
 
-	void Context::SetTextures(const std::vector<std::pair<int, TextureBuffer*>>& textures) {
+	void Context::BindTextures(const std::vector<std::pair<int, TextureBuffer*>>& textures) {
 		for (auto tex : textures) {
 			tex.second->BindForRendering(tex.first);
+
+			mBoundTextures[tex.first][tex.second->GetType()] = true;
+		}
+	}
+
+	void Context::UnbindAllTextures() {
+		for (int i = 0; i < 32;++i) {
+			for (int j = 0; j < 2; ++j) {
+				if (mBoundTextures[i][j]) {
+					glActiveTexture(GL_TEXTURE0 + i);
+					glBindTexture(TextureBuffer::TextureTypeConvertNative[j], 0);
+
+					mBoundTextures[i][j] = false;
+				}
+
+			}
+		}
+	}
+
+	void Context::UnbindTexturesByType(TextureType type) {
+		for (int i = 0; i < 32; ++i) {
+			if (mBoundTextures[i][type]) {
+				glActiveTexture(GL_TEXTURE0 + i);
+				glBindTexture(TextureBuffer::TextureTypeConvertNative[type], 0);
+
+				mBoundTextures[i][type] = false;
+			}
+		}
+	}
+
+	void Context::SetDatabuffer(DataBuffer* buffer, bool forceSet) {
+		if (buffer != mCurrentState.Databuffer || forceSet) {
+			if (buffer == nullptr) {
+				glBindVertexArray(0);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			}
+			else {
+				glBindVertexArray(buffer->mArrayBufferHandle);
+				if (buffer->mIndicesSlotHandle) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
+
+				mCurrentState.Databuffer = buffer;
+			}
 		}
 	}
 
@@ -127,6 +158,8 @@ namespace Backend {
 		for (auto& key : textures) {
 			mCurrentState.Shader->SetInt(key.UniformName, key.Slot);
 			key.Texture->BindForRendering(key.Slot);
+
+			mBoundTextures[key.Slot][key.Texture->GetType()] = true;
 		}
 	}
 	

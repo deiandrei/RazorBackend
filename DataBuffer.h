@@ -47,7 +47,7 @@ namespace Backend {
 
 			// Utility functions
 			template<typename T>
-			BufferSlot* UploadData(const std::vector<T> arr, int dataOffset = 0) { return UploadData(&arr[0], sizeof(T) * arr.size(), dataOffset); }
+			BufferSlot* UploadData(const std::vector<T> arr, int dataOffset = 0) { if (arr.empty()) return this; return UploadData(&arr[0], sizeof(T) * arr.size(), dataOffset); }
 
 		protected:
 			BufferSlot(DataBuffer* parent, bool dynamicSlot = false);
@@ -75,7 +75,7 @@ namespace Backend {
 			BufferSlot* GetBufferSlot(const std::string& name);
 
 			// Utility functions
-			void UploadIndices(const std::vector<unsigned int>& indices) { UploadIndices(&indices[0], (unsigned int)(sizeof(indices[0]) * indices.size())); }
+			void UploadIndices(const std::vector<unsigned int>& indices) { if(indices.size()) UploadIndices(&indices[0], (unsigned int)(sizeof(indices[0]) * indices.size())); }
 			
 		protected:
 			void Bind() { glBindVertexArray(mArrayBufferHandle); }

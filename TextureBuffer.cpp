@@ -2,8 +2,8 @@
 
 namespace Backend {
 	const GLenum TextureBuffer::TextureTypeConvertNative[2] = { GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP };
-	const GLenum TextureBuffer::InternalFormatConvertNative[TextureFormat::NUM_FORMATS] = { GL_R16F, GL_R, GL_RG16F, GL_RG, GL_RGB16F, GL_RGB, GL_RGBA16F, GL_RGBA, GL_SRGB, GL_SRGB_ALPHA, GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32 };
-	const GLenum TextureBuffer::FormatConvertNative[TextureFormat::NUM_FORMATS] = { GL_R, GL_R, GL_RG, GL_RG, GL_RGB, GL_RGB, GL_RGBA, GL_RGBA, GL_RGB, GL_RGBA, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT };
+	const GLenum TextureBuffer::InternalFormatConvertNative[TextureFormat::NUM_FORMATS] = { GL_R16F, GL_RED, GL_RG16F, GL_RG, GL_RGB16F, GL_RGB, GL_RGBA16F, GL_RGBA, GL_SRGB, GL_SRGB_ALPHA, GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32 };
+	const GLenum TextureBuffer::FormatConvertNative[TextureFormat::NUM_FORMATS] = { GL_RED, GL_RED, GL_RG, GL_RG, GL_RGB, GL_RGB, GL_RGBA, GL_RGBA, GL_RGB, GL_RGBA, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT };
 
 	TextureBuffer::TextureBuffer(TextureType type) {
 		glGenTextures(1, &mTextureRef);
