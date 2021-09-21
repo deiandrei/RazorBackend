@@ -5,8 +5,8 @@
 #include "ShaderProgram.h"
 
 namespace Backend {
-	Context::Context(int screenWidth, int screenHeight) {
-		CreateDefaultRB(screenWidth, screenHeight);
+	Context::Context(int screenWidth, int screenHeight, int defaultFBO) {
+		CreateDefaultRB(screenWidth, screenHeight, defaultFBO);
 
 		memset(mBoundTextures, 0, sizeof(mBoundTextures));
 
@@ -86,10 +86,10 @@ namespace Backend {
 		}
 	}
 
-	void Context::CreateDefaultRB(int w, int h) {
+	void Context::CreateDefaultRB(int w, int h, int defaultFBO) {
 		DefaultRenderBuffer = new RenderBuffer(w, h);
 		glDeleteFramebuffers(1, &DefaultRenderBuffer->mBufferHandle);
-		DefaultRenderBuffer->mBufferHandle = 0;
+		DefaultRenderBuffer->mBufferHandle = defaultFBO;
 	}
 
 	void Context::SetShader(ShaderProgram* shader) {

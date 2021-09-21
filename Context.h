@@ -59,7 +59,7 @@ namespace Backend {
 			};
 
 		public:
-			Context(int screenWidth, int screenHeight);
+			Context(int screenWidth, int screenHeight, int defaultFBO = 0);
 			~Context() { }
 
 			RenderBuffer* DefaultRenderBuffer;
@@ -109,7 +109,7 @@ namespace Backend {
 		protected:
 			GLenum ConvertRenderModeToNative(RenderMode mode);
 
-			void CreateDefaultRB(int w, int h);
+			void CreateDefaultRB(int w, int h, int defaultFBO);
 			//void CheckStateChanges();
 
 
