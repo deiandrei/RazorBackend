@@ -57,6 +57,8 @@ namespace Backend {
 			RenderBuffer* SetSlotsUsedToDraw(const std::vector<std::string>& slots);
 			RenderBuffer* UseAllSlotsToDraw();
 
+			TextureBuffer* GetMainTexture();
+
 			// Basic stuff
 			void Copy(RenderBuffer* destination, AttachmentType copyType);
 

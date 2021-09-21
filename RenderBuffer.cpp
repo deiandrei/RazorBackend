@@ -260,4 +260,10 @@ namespace Backend {
 		return this;
 	}
 
+	TextureBuffer* RenderBuffer::GetMainTexture() {
+		if (mColorAttachmentsCount) return GetSlotByType(ATTACHMENT_COLOR)->Texture();
+
+		return nullptr;
+	}
+
 }
