@@ -25,19 +25,23 @@ namespace Backend {
 	}
 
 	RenderBuffer* Context::CreateRenderBuffer(int w, int h) {
-		return new RenderBuffer(this, w, h);
+		return new RenderBuffer(w, h);
+		//return new RenderBuffer(this, w, h);
 	}
 
 	ShaderProgram* Context::CreateShaderProgram() {
-		return new ShaderProgram(this);
+		return new ShaderProgram();
+		//return new ShaderProgram(this);
 	}
 
 	DataBuffer* Context::CreateDataBuffer() {
-		return new DataBuffer(this);
+		return new DataBuffer();
+		//return new DataBuffer(this);
 	}
 
 	TextureBuffer* Context::CreateTextureBuffer(TextureType type) {
-		return new TextureBuffer(this, type);
+		return new TextureBuffer(type);
+		//return new TextureBuffer(this, type);
 	}
 
 	void Context::SaveState() {
@@ -103,7 +107,7 @@ namespace Backend {
 	}
 
 	void Context::CreateDefaultRB(int w, int h, int defaultFBO) {
-		DefaultRenderBuffer = new RenderBuffer(this, w, h);
+		DefaultRenderBuffer = new RenderBuffer(w, h);
 		glDeleteFramebuffers(1, &DefaultRenderBuffer->mBufferHandle);
 		DefaultRenderBuffer->mBufferHandle = defaultFBO;
 	}

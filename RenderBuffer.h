@@ -36,10 +36,8 @@ namespace Backend {
 		public:
 			static unsigned int MAX_COLOR_ATTACHMENTS;
 
-		protected:
-			RenderBuffer(Context* ctx, int w, int h);
-
 		public:
+			RenderBuffer(int w, int h);
 			~RenderBuffer();
 
 			void Resize(int w, int h);

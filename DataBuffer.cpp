@@ -3,9 +3,7 @@
 
 namespace Backend {
 
-	DataBuffer::DataBuffer(Context* ctx) {
-		mContext = ctx;
-
+	DataBuffer::DataBuffer() {
 		glGenVertexArrays(1, &mArrayBufferHandle);
 
 		mIndicesSlotHandle = 0;

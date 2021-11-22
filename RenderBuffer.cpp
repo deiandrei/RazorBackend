@@ -6,9 +6,7 @@ namespace Backend {
 
 	unsigned int RenderBuffer::MAX_COLOR_ATTACHMENTS = 8;
 
-	RenderBuffer::RenderBuffer(Context* ctx, int w, int h) {
-		mContext = ctx;
-
+	RenderBuffer::RenderBuffer(int w, int h) {
 		glGenFramebuffers(1, &mBufferHandle);
 
 		mWidth = w;

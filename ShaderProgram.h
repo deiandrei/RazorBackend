@@ -45,10 +45,8 @@ namespace Backend {
 	};
 
 	class ShaderProgram {
-		protected:
-			ShaderProgram(Context* ctx);
-
 		public:
+			ShaderProgram();
 			~ShaderProgram();
 
 			void Compile();

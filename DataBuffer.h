@@ -65,10 +65,8 @@ namespace Backend {
 	};
 
 	class DataBuffer {
-		protected:
-			DataBuffer(Context* ctx);
-
 		public:
+			DataBuffer();
 			~DataBuffer();
 
 			void ReserveIndices(unsigned int size);

@@ -16,10 +16,8 @@ namespace Backend {
 	////
 
 	class TextureBuffer {
-		protected:
-			TextureBuffer(Context* ctx, TextureType type = TextureType::TEXTURE_STANDARD);
-
 		public:
+			TextureBuffer(TextureType type = TextureType::TEXTURE_STANDARD);
 			~TextureBuffer();
 
 			GLuint& GetNativeHandle() { return mTextureRef; }

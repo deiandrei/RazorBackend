@@ -4,9 +4,7 @@
 
 namespace Backend {
 
-	ShaderProgram::ShaderProgram(Context* ctx) {
-		mContext = ctx;
-
+	ShaderProgram::ShaderProgram() {
 		mProgramHandle = glCreateProgram();
 		mIsPrepared = false;
 	}
