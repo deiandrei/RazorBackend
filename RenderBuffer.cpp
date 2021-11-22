@@ -1,10 +1,14 @@
 #include "RenderBuffer.h"
+#include "Context.h"
+#include "TextureBuffer.h"
 
 namespace Backend {
 
 	unsigned int RenderBuffer::MAX_COLOR_ATTACHMENTS = 8;
 
-	RenderBuffer::RenderBuffer(int w, int h) {
+	RenderBuffer::RenderBuffer(Context* ctx, int w, int h) {
+		mContext = ctx;
+
 		glGenFramebuffers(1, &mBufferHandle);
 
 		mWidth = w;
@@ -129,7 +133,7 @@ namespace Backend {
 	}
 
 	RenderBuffer* RenderBuffer::AddSlot(const std::string& name, AttachmentType type, TextureFormat textureFormat) {
-		TextureBuffer* tex = new TextureBuffer;
+		TextureBuffer* tex = mContext->CreateTextureBuffer(TextureType::TEXTURE_STANDARD);
 		tex->CreateFromFormat(textureFormat, mWidth, mHeight)->SetFilterMinMag(TextureFilter::FILTER_LINEAR, TextureFilter::FILTER_LINEAR);
 
 		AddSlotImpl(name, type, tex, TextureFace::TEXTURE_FACE_PLANE, 0, true);

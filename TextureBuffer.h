@@ -4,6 +4,7 @@
 #include "include.h"
 
 namespace Backend {
+	class Context;
 
 	enum TextureFace { TEXTURE_FACE_POSITIVE_X, TEXTURE_FACE_NEGATIVE_X, TEXTURE_FACE_POSITIVE_Y, TEXTURE_FACE_NEGATIVE_Y, TEXTURE_FACE_POSITIVE_Z, TEXTURE_FACE_NEGATIVE_Z, TEXTURE_FACE_PLANE };
 	enum TextureType { TEXTURE_STANDARD, TEXTURE_CUBE };
@@ -15,8 +16,10 @@ namespace Backend {
 	////
 
 	class TextureBuffer {
+		protected:
+			TextureBuffer(Context* ctx, TextureType type = TextureType::TEXTURE_STANDARD);
+
 		public:
-			TextureBuffer(TextureType type = TextureType::TEXTURE_STANDARD);
 			~TextureBuffer();
 
 			GLuint& GetNativeHandle() { return mTextureRef; }
@@ -68,6 +71,9 @@ namespace Backend {
 			static const GLenum InternalFormatConvertNative[TextureFormat::NUM_FORMATS];
 			static const GLenum FormatConvertNative[TextureFormat::NUM_FORMATS];
 			
+		protected:
+			Context* mContext;
+
 			friend class Context;
 
 	};

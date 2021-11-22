@@ -24,6 +24,22 @@ namespace Backend {
 		
 	}
 
+	RenderBuffer* Context::CreateRenderBuffer(int w, int h) {
+		return new RenderBuffer(this, w, h);
+	}
+
+	ShaderProgram* Context::CreateShaderProgram() {
+		return new ShaderProgram(this);
+	}
+
+	DataBuffer* Context::CreateDataBuffer() {
+		return new DataBuffer(this);
+	}
+
+	TextureBuffer* Context::CreateTextureBuffer(TextureType type) {
+		return new TextureBuffer(this, type);
+	}
+
 	void Context::SaveState() {
 		mSavedStates.push_back(mCurrentState);
 	}
@@ -87,7 +103,7 @@ namespace Backend {
 	}
 
 	void Context::CreateDefaultRB(int w, int h, int defaultFBO) {
-		DefaultRenderBuffer = new RenderBuffer(w, h);
+		DefaultRenderBuffer = new RenderBuffer(this, w, h);
 		glDeleteFramebuffers(1, &DefaultRenderBuffer->mBufferHandle);
 		DefaultRenderBuffer->mBufferHandle = defaultFBO;
 	}
@@ -138,6 +154,10 @@ namespace Backend {
 		}
 	}
 
+	void Context::SetDefaultFramebufferInternalHandle(int handle) {
+		DefaultRenderBuffer->mBufferHandle = handle;
+	}
+
 	void Context::SetDatabuffer(DataBuffer* buffer, bool forceSet) {
 		if (buffer != mCurrentState.Databuffer || forceSet) {
 			if (buffer == nullptr) {
@@ -147,7 +167,7 @@ namespace Backend {
 			}
 			else {
 				glBindVertexArray(buffer->mArrayBufferHandle);
-				if (buffer->mIndicesSlotHandle) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->mIndicesSlotHandle);
 
 				mCurrentState.Databuffer = buffer;
 			}

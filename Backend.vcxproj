@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="DataBuffer.cpp" />
     <ClCompile Include="Context.cpp" />
+    <ClCompile Include="InternalStateManager.cpp" />
     <ClCompile Include="RenderBuffer.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="TextureBuffer.cpp" />
@@ -29,6 +30,7 @@
     <ClInclude Include="DataBuffer.h" />
     <ClInclude Include="include.h" />
     <ClInclude Include="Context.h" />
+    <ClInclude Include="InternalStateManager.h" />
     <ClInclude Include="RenderBuffer.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="TextureBuffer.h" />

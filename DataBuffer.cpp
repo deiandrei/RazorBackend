@@ -1,8 +1,11 @@
 #include "DataBuffer.h"
+#include "Context.h"
 
 namespace Backend {
 
-	DataBuffer::DataBuffer() {
+	DataBuffer::DataBuffer(Context* ctx) {
+		mContext = ctx;
+
 		glGenVertexArrays(1, &mArrayBufferHandle);
 
 		mIndicesSlotHandle = 0;

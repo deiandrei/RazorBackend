@@ -2,6 +2,7 @@
 #define CONTEXT_R_H
 
 #include "include.h"
+#include "TextureBuffer.h"
 
 namespace Backend {
 
@@ -64,6 +65,12 @@ namespace Backend {
 
 			RenderBuffer* DefaultRenderBuffer;
 
+			// Factory
+			RenderBuffer* CreateRenderBuffer(int w, int h);
+			ShaderProgram* CreateShaderProgram();
+			DataBuffer* CreateDataBuffer();
+			TextureBuffer* CreateTextureBuffer(TextureType type = TextureType::TEXTURE_STANDARD);
+
 			// State setup and history
 			void SaveState();
 			void RestoreState();
@@ -92,6 +99,8 @@ namespace Backend {
 
 			void UnbindAllTextures();
 			void UnbindTexturesByType(TextureType type);
+
+			void SetDefaultFramebufferInternalHandle(int handle);
 
 			// Render buffer stuff
 			void SetRenderbuffer(RenderBuffer* rb, bool setAnyway = false);

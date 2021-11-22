@@ -4,7 +4,7 @@
 #include "include.h"
 
 namespace Backend {
-	class Pipeline;
+	class Context;
 	class DataBuffer;
 	class BufferSlot;
 	class BufferSlotDescriptor;
@@ -65,8 +65,10 @@ namespace Backend {
 	};
 
 	class DataBuffer {
+		protected:
+			DataBuffer(Context* ctx);
+
 		public:
-			DataBuffer();
 			~DataBuffer();
 
 			void ReserveIndices(unsigned int size);
@@ -90,6 +92,10 @@ namespace Backend {
 			bool mDynamicIndices;
 
 			friend class BufferSlot;
+
+		protected:
+			Context* mContext;
+
 			friend class Context;
 
 	};

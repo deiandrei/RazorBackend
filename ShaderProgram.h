@@ -4,7 +4,7 @@
 #include "include.h"
 
 namespace Backend {
-	class Pipeline;
+	class Context;
 	class ShaderProgram;
 	class ShaderUniform;
 	class ShaderSlot;
@@ -45,8 +45,10 @@ namespace Backend {
 	};
 
 	class ShaderProgram {
+		protected:
+			ShaderProgram(Context* ctx);
+
 		public:
-			ShaderProgram();
 			~ShaderProgram();
 
 			void Compile();
@@ -80,6 +82,9 @@ namespace Backend {
 			std::map<std::string, ShaderUniform*> mUniforms;
 			std::map<ShaderSlotType, ShaderSlot*> mSlots;
 			std::vector<std::string> mAttributes;
+
+		protected:
+			Context* mContext;
 
 			friend class Context;
 

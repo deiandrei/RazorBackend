@@ -5,7 +5,7 @@
 #include "TextureBuffer.h"
 
 namespace Backend {
-	class Pipeline;
+	class Context;
 	class RenderBuffer;
 	class RenderBufferSlot;
 
@@ -36,8 +36,10 @@ namespace Backend {
 		public:
 			static unsigned int MAX_COLOR_ATTACHMENTS;
 
+		protected:
+			RenderBuffer(Context* ctx, int w, int h);
+
 		public:
-			RenderBuffer(int w, int h);
 			~RenderBuffer();
 
 			void Resize(int w, int h);
@@ -77,6 +79,9 @@ namespace Backend {
 
 			std::map<std::string, RenderBufferSlot*> mSlots;
 			unsigned int mColorAttachmentsCount;
+
+		protected:
+			Context* mContext;
 
 			friend class Context;
 

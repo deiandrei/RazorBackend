@@ -1,9 +1,12 @@
 #include "ShaderProgram.h"
+#include "Context.h"
 #include <ostream>
 
 namespace Backend {
 
-	ShaderProgram::ShaderProgram() {
+	ShaderProgram::ShaderProgram(Context* ctx) {
+		mContext = ctx;
+
 		mProgramHandle = glCreateProgram();
 		mIsPrepared = false;
 	}
