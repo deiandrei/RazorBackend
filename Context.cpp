@@ -59,6 +59,7 @@ namespace Backend {
 		SetDepthMode(state.DepthMode);
 		SetShader(state.Shader);
 		SetRenderbuffer(state.Renderbuffer);
+		SetViewport(state.Viewport);
 	}
 
 	void Context::FrameBegin() {
@@ -191,15 +192,7 @@ namespace Backend {
 		if (!rb) rb = DefaultRenderBuffer;
 
 		if (setAnyway || rb != mCurrentState.Renderbuffer) {
-			int lastWidth = mCurrentState.Renderbuffer->GetWidth();
-			int lastHeight = mCurrentState.Renderbuffer->GetHeight();
-
-			int width = rb->GetWidth();
-			int height = rb->GetHeight();
-
-			if (lastWidth != width || lastHeight != height || setAnyway) {
-				glViewport(0, 0, width, height);
-			}
+			SetViewport({ rb->GetWidth(), rb->GetHeight() });
 
 			rb->Bind();
 
@@ -268,6 +261,13 @@ namespace Backend {
 			}
 
 			mCurrentState.DepthMode = mode;
+		}
+	}
+
+	void Context::SetViewport(SViewport viewport, bool forceSet) {
+		if (viewport != mCurrentState.Viewport || forceSet) {
+			mCurrentState.Viewport = viewport;
+			glViewport(0, 0, viewport.Width, viewport.Height);
 		}
 	}
 

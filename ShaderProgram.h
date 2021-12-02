@@ -3,6 +3,8 @@
 
 #include "include.h"
 
+#define MATPTR(mat) ((float*)&mat[0][0])
+
 namespace Backend {
 	class Context;
 	class ShaderProgram;

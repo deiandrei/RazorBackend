@@ -34,6 +34,24 @@ namespace Backend {
 
 	using TextureBindVector = std::vector<TextureBindKey>;
 
+	class SViewport {
+		public:
+			SViewport(int w, int h) { Width = w; Height = h; }
+			SViewport() { Width = Height = 0; }
+
+			int Width;
+			int Height;
+
+			bool operator==(const SViewport& other) {
+				return (Width == other.Width && Height == other.Height);
+			}
+
+			bool operator!=(const SViewport& other) {
+				return !(*this == other);
+			}
+
+	};
+
 	class Context {
 		protected:
 			struct ContextState {
@@ -43,6 +61,7 @@ namespace Backend {
 				ShaderProgram* Shader;
 				RenderBuffer* Renderbuffer;
 				DataBuffer* Databuffer;
+				SViewport Viewport;
 
 				ContextState() {
 					Shader = nullptr;
@@ -56,6 +75,7 @@ namespace Backend {
 					Shader = other.Shader;
 					Renderbuffer = other.Renderbuffer;
 					Databuffer = other.Databuffer;
+					Viewport = other.Viewport;
 				}
 			};
 
@@ -82,10 +102,12 @@ namespace Backend {
 			void SetCullMode(CullingMode mode);
 			void SetBlendMode(BlendingMode mode);
 			void SetDepthMode(DepthTestMode mode);
+			void SetViewport(SViewport viewport, bool forceSet = false);
 
 			CullingMode CullMode() { return mCurrentState.CullMode; }
 			BlendingMode BlendMode() { return mCurrentState.BlendMode; }
 			DepthTestMode DepthMode() { return mCurrentState.DepthMode; }
+			SViewport Viewport() { return mCurrentState.Viewport; }
 
 			// Rendering stuff
 			void SetDatabuffer(DataBuffer* buffer, bool forceSet = false);
